@@ -1,0 +1,38 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: color-mix(in srgb, #050505 55%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.card {
+  width: min(100%, 480px);
+  border: 1px solid color-mix(in srgb, var(--card-outline-color) 82%, white);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card-background-color) 94%, white 6%), var(--card-background-color));
+  box-shadow:
+    0 22px 80px color-mix(in srgb, #000 58%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 10%, transparent);
+  overflow: hidden;
+}
+
+.content {
+  padding: 28px;
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: 16px;
+  }
+
+  .content {
+    padding: 22px 18px;
+  }
+}

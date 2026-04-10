@@ -1,13 +1,8 @@
 "use client";
-import { Suspense, useState } from "react";
 
-import "./login.css";
+import { useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import LightningQrCode from "../components/LightningQrCode";
-import { getLNChallenge } from "../api";
-import { components } from "@les-chauffagistes/authentication-types";
-import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
 
 function DiscordIcon() {
     return (
@@ -33,42 +28,28 @@ function UserIcon() {
     );
 }
 
-function LoginPageContent() {
-    const [activeProvider, setActiveProvider] = useState<"lightning" | "credentials" | null>(null);
+export default function LoginClientPage() {
+    const [showForm, setShowForm] = useState(false);
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [pseudo, setPseudo] = useState("");
-    const [pseudoPopupOpen, setPseudoPopupOpen] = useState(false);
-    const [pseudoError, setPseudoError] = useState<string | null>(null);
-    const [pseudoLoading, setPseudoLoading] = useState(false);
-    const [challenge, setChallenge] = useState<components["schemas"]["LNChallenge"] | null>(null);
     const [loading, setLoading] = useState(false);
-    const [sessionToken, setSessionToken] = useState<string | null>(null);
-
     const searchParams = useSearchParams();
-    const redirect = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL;
-    const showLnForm = activeProvider === "lightning";
-    const showCredsForm = activeProvider === "credentials";
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/login-or-register`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/login-or-register?${searchParams.toString()}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: "include",
                 body: JSON.stringify({ username, password }),
             });
             if (!res.ok) {
                 const data = await res.json();
                 setError(data.error ?? "Erreur inconnue");
                 return;
-            } else {
-                console.log(searchParams)
-                window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!;
             }
         } catch {
             setError("Erreur réseau");
@@ -77,53 +58,14 @@ function LoginPageContent() {
         }
     }
 
-    async function handlePseudoSubmit(nextPseudo: string) {
-        setPseudoError(null);
-        setPseudoLoading(true);
-
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/lightning/complete`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ pseudo: nextPseudo, session_token: sessionToken }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => null);
-                setPseudoError(data?.error ?? "Impossible d'enregistrer ce pseudo.");
-                return;
-            }
-
-            setPseudo(nextPseudo);
-            setPseudoPopupOpen(false);
-            window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!;
-        } catch {
-            setPseudoError("Erreur réseau");
-        } finally {
-            setPseudoLoading(false);
-        }
-    }
+    const redirect = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL;
 
     return (
         <div className="login-container">
-            <ChoosePseudoPopup
-                key={`${pseudoPopupOpen}-${pseudo}`}
-                error={pseudoError}
-                initialValue={pseudo}
-                isOpen={pseudoPopupOpen}
-                isSubmitting={pseudoLoading}
-                onClose={() => {
-                    if (!pseudoLoading) {
-                        setPseudoPopupOpen(false);
-                    }
-                }}
-                onSubmit={handlePseudoSubmit}
-            />
             <div className="login-header">
-                <Image src="/brand-icon.png" alt="Logo" width={50} height={50} quality={75} />
+                <Image src="/brand-icon.png" alt="Logo" width={50} height={50} quality={100}/>
                 <h1>Bon retour parmi nous</h1>
-                <p>Connectez-vous à votre compte <span>Chauffagistes</span></p>
+                <p>Connectez-vous à votre compte <span>Chuaffagistes</span></p>
             </div>
 
             <div className="login-methods">
@@ -143,56 +85,27 @@ function LoginPageContent() {
                 <span className="login-divider">ou</span>
 
                 <div
-                    className={`login-method${showLnForm ? " expanded" : ""}`}
-                    onClick={() => {
-                        if (!showLnForm) {
-                            getLNChallenge().then(challenge => setChallenge(challenge));
-                            setError(null);
-                            setActiveProvider("lightning");
-                        }
-                    }}
+                    className="login-method"
                 >
                     <div className="login-method-icon">
                         <LightningIcon />
                     </div>
                     <h3>Lightning</h3>
-                    {!showLnForm && <p>Authentification non-KYC via votre wallet</p>}
-                    {showLnForm && (
-                        <>
-                            <LightningQrCode challenge={challenge} onLogin={(payload) => {
-                                if (payload.status === "onboarding") {
-                                    setSessionToken(payload.session_token || null); // session_token is never undefined here
-                                    setPseudoError(null);
-                                    setPseudoPopupOpen(true);
-                                } else if (payload.status === "logged_in") {
-                                    window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!
-                                }
-                            }
-                            } />
-                            <button type="button" className="tertiary" onClick={(e) => { e.stopPropagation(); setActiveProvider(null); }}>
-                                Retour
-                            </button>
-                        </>
-                    )}
+                    <p>Authentification non-KYC via votre wallet</p>
                 </div>
 
                 <span className="login-divider">ou</span>
 
                 <div
-                    className={`login-method${showCredsForm ? " expanded" : ""}`}
-                    onClick={() => {
-                        if (!showCredsForm) {
-                            setError(null);
-                            setActiveProvider("credentials");
-                        }
-                    }}
+                    className={`login-method${showForm ? " expanded" : ""}`}
+                    onClick={() => { if (!showForm) setShowForm(true); }}
                 >
                     <div className="login-method-icon">
                         <UserIcon />
                     </div>
                     <h3>Identifiant</h3>
-                    {!showCredsForm && <p>Utiliser un identifiant et un mot de passe</p>}
-                    {showCredsForm && (
+                    {!showForm && <p>Utiliser un identifiant et un mot de passe</p>}
+                    {showForm && (
                         <form className="credentials-form" onSubmit={handleSubmit} onClick={e => e.stopPropagation()}>
                             <input
                                 type="text"
@@ -216,7 +129,7 @@ function LoginPageContent() {
                             <button type="submit" className="primary" disabled={loading}>
                                 {loading ? "Connexion..." : "Continuer"}
                             </button>
-                            <button type="button" className="tertiary" onClick={(e) => { e.stopPropagation(); setActiveProvider(null); setError(null); }}>
+                            <button type="button" className="tertiary" onClick={(e) => { e.stopPropagation(); setShowForm(false); setError(null); }}>
                                 Retour
                             </button>
                         </form>
@@ -224,13 +137,5 @@ function LoginPageContent() {
                 </div>
             </div>
         </div>
-    );
-}
-
-export default function LoginPage() {
-    return (
-        <Suspense fallback={null}>
-            <LoginPageContent />
-        </Suspense>
     );
 }

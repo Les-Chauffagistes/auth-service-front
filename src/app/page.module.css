@@ -1,14 +1,4 @@
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -26,7 +16,6 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: var(--foreground);
   padding: 120px 60px;
 }
 
@@ -45,7 +34,7 @@
   line-height: 48px;
   letter-spacing: -2.4px;
   text-wrap: balance;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .intro p {
@@ -53,12 +42,12 @@
   font-size: 18px;
   line-height: 32px;
   text-wrap: balance;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .intro a {
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--text-main);
 }
 
 .ctas {
@@ -84,8 +73,8 @@
   font-weight: 500;
 }
 
-a.primary {
-  background: var(--text-primary);
+a.main {
+  background: var(--text-main);
   color: var(--background);
   gap: 8px;
 }
@@ -96,8 +85,8 @@ a.secondary {
 
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
+  a.main:hover {
+    background: var(--button-main-hover);
     border-color: transparent;
   }
 
@@ -120,23 +109,5 @@ a.secondary {
     font-size: 32px;
     line-height: 40px;
     letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
   }
 }

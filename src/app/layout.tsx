@@ -71,7 +71,6 @@ export default function RootLayout({
                 minHeight: "100dvh",
             }}
         >
-            <Navbar />
             {children}
             <Footer />
         </main>

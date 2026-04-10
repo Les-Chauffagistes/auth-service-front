@@ -1,14 +1,14 @@
-FROM python:3.13-alpine
-
+FROM node:22-alpine AS build
 WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+COPY package*.json ./
+COPY .npmrc ./
+RUN npm ci
 COPY . .
 
-ENV PYTHONPATH=/app/src
+RUN npm run build
 
-RUN python -m pytest tests -vv --maxfail=1
-
-CMD ["python", "main.py"]
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build /app ./
+CMD ["npm", "start"]
