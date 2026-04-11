@@ -5,6 +5,15 @@ import { useSearchParams } from "next/navigation";
 import type { ComponentPropsWithoutRef } from "react";
 
 type Props = LinkProps & ComponentPropsWithoutRef<typeof Link>;
+type QueryValue = string | string[];
+
+function normalizeQuery(query: unknown): Record<string, QueryValue> {
+    if (!query || typeof query !== "object" || Array.isArray(query)) {
+        return {};
+    }
+
+    return { ...query as Record<string, QueryValue> };
+}
 
 function mergeHref(
     href: LinkProps["href"],
@@ -25,7 +34,7 @@ function mergeHref(
         return `${url.pathname}${url.search}${url.hash}`;
     }
 
-    const nextQuery = { ...(href.query ?? {}) };
+    const nextQuery = normalizeQuery(href.query);
     currentSearchParams.forEach((value, key) => {
         if (!(key in nextQuery)) {
             nextQuery[key] = value;
