@@ -10,5 +10,5 @@ jobs:
   build-app:
     uses: les-chauffagistes/deploy/.github/workflows/build.yml@develop
     with:
-      service-name: auth-service-back
+      service-name: auth-service-front
     secrets: inherit
