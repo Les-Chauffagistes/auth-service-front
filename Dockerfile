@@ -1,14 +1,23 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-COPY package*.json ./
-COPY .npmrc ./
-RUN npm ci
-COPY . .
 
+COPY package*.json ./
+RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci
+COPY . .
 RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app ./
-CMD ["npm", "start"]
+
+RUN apk add --no-cache openssl libssl3
+
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static     ./.next/static
+COPY --from=build /app/public           ./public
+
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+EXPOSE 3002
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]

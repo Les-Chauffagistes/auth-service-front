@@ -61,6 +61,8 @@ export default function RootLayout({
         <html lang="fr">
         <head>
             <meta name="theme-color" content="#cc640e" />
+            {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+            <script src="/config.js" />
         </head>
 
         <body>

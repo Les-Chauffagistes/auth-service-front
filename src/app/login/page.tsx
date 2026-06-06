@@ -8,6 +8,7 @@ import LightningQrCode from "../components/LightningQrCode";
 import { getLNChallenge } from "../api";
 import { components } from "@les-chauffagistes/authentication-types";
 import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
+import { env } from "@/server/env";
 
 function DiscordIcon() {
     return (
@@ -47,7 +48,7 @@ function LoginPageContent() {
     const [sessionToken, setSessionToken] = useState<string | null>(null);
 
     const searchParams = useSearchParams();
-    const redirect = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL;
+    const redirect = searchParams.get("redirect") || env.authUrl;
     const showLnForm = activeProvider === "lightning";
     const showCredsForm = activeProvider === "credentials";
 
@@ -56,7 +57,7 @@ function LoginPageContent() {
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/login-or-register`, {
+            const res = await fetch(`${env.authUrl}/login-or-register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -68,7 +69,7 @@ function LoginPageContent() {
                 return;
             } else {
                 console.log(searchParams)
-                window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!;
+                window.location.href = searchParams.get("redirect") || env.baseUrl!;
             }
         } catch {
             setError("Erreur réseau");
@@ -82,7 +83,7 @@ function LoginPageContent() {
         setPseudoLoading(true);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/lightning/complete`, {
+            const res = await fetch(`${env.authUrl}/lightning/complete`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -97,7 +98,7 @@ function LoginPageContent() {
 
             setPseudo(nextPseudo);
             setPseudoPopupOpen(false);
-            window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!;
+            window.location.href = searchParams.get("redirect") || env.baseUrl;
         } catch {
             setPseudoError("Erreur réseau");
         } finally {
@@ -130,7 +131,7 @@ function LoginPageContent() {
                 <div
                     className="login-method"
                     onClick={() => {
-                        window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/discord/login?redirect=${redirect}`;
+                        window.location.href = `${env.authUrl}/discord/login?redirect=${redirect}`;
                     }}
                 >
                     <div className="login-method-icon">
@@ -165,7 +166,7 @@ function LoginPageContent() {
                                     setPseudoError(null);
                                     setPseudoPopupOpen(true);
                                 } else if (payload.status === "logged_in") {
-                                    window.location.href = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL!
+                                    window.location.href = searchParams.get("redirect") || env.baseUrl;
                                 }
                             }
                             } />

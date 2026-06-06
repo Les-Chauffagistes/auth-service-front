@@ -2,6 +2,7 @@ import { components } from '@les-chauffagistes/authentication-types';
 import { ExternalLink, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { exchangeCode } from '../api';
+import { env } from "@/server/env";
 
 type LightningQrCodeProps = {
     challenge: components["schemas"]["LNChallenge"] | null,
@@ -12,7 +13,7 @@ export default function LightningQrCode({ challenge, onLogin }: Readonly<Lightni
     let lnurl: string | null = null
     if (challenge) {
         lnurl = `lightning:${challenge.lnurl}`
-        const ws = new WebSocket(`${process.env.NEXT_PUBLIC_AUTH_URL}/lightning/ws?k1=${challenge.k1}`);
+        const ws = new WebSocket(`${env.authUrl}/lightning/ws?k1=${challenge.k1}`);
         ws.onmessage = (ev) => {
             const data: components["schemas"]["LNCallbackSuccessPayload"] = JSON.parse(ev.data)
             exchangeCode(data.code).then(payload => onLogin(payload));

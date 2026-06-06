@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
+import {env} from "@/server/env";
 
 function DiscordIcon() {
     return (
@@ -41,7 +42,7 @@ export default function LoginClientPage() {
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_AUTH_URL}/login-or-register?${searchParams.toString()}`, {
+            const res = await fetch(`${env.authUrl}/login-or-register?${searchParams.toString()}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password }),
@@ -58,7 +59,7 @@ export default function LoginClientPage() {
         }
     }
 
-    const redirect = searchParams.get("redirect") || process.env.NEXT_PUBLIC_BASE_URL;
+    const redirect = searchParams.get("redirect") || env.baseUrl;
 
     return (
         <div className="login-container">
@@ -72,7 +73,7 @@ export default function LoginClientPage() {
                 <div
                     className="login-method"
                     onClick={() => {
-                        window.location.href = `${process.env.NEXT_PUBLIC_AUTH_URL}/discord/login?redirect=${redirect}`;
+                        window.location.href = `${env.authUrl}/discord/login?redirect=${redirect}`;
                     }}
                 >
                     <div className="login-method-icon">
