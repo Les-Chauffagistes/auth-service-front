@@ -9,4 +9,9 @@ export const config = {
       ? (window.__CONFIG__?.AUTH_URL ?? "")
       : (process.env.AUTH_URL ?? "");
   },
+  get AUTH_API_URL() {
+    return typeof window !== "undefined"
+      ? (window.__CONFIG__?.AUTH_API_URL ?? "")
+      : (process.env.AUTH_API_URL ?? "");
+  },
 };

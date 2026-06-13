@@ -21,25 +21,25 @@ async function authFetch(input: RequestInfo, init?: RequestInit) {
 }
 
 export async function getMe(): Promise<components["schemas"]["User"] | null> {
-    const res = await authFetch(`${config.AUTH_URL}/me`);
+    const res = await authFetch(`${config.AUTH_API_URL}/me`);
     if (!res.ok) return null;
     return res.json();
 }
 
 export async function refreshToken() {
-    return await fetch(`${config.AUTH_URL}/refresh`, { credentials: "include", method: "POST" });
+    return await fetch(`${config.AUTH_API_URL}/refresh`, { credentials: "include", method: "POST" });
 }
 
 export async function getLNChallenge(): Promise<components["schemas"]["LNChallenge"]> {
-    return await fetch(`${config.AUTH_URL}/lightning/challenge`).then(res => res.json());
+    return await fetch(`${config.AUTH_API_URL}/lightning/challenge`).then(res => res.json());
 }
 
 export async function exchangeCode(code: string): Promise<components["schemas"]["ExchangeCodePayload"]> {
-    return await fetch(`${config.AUTH_URL}/exchange`, { credentials: "include", method: "POST", body: JSON.stringify({ "code": code }) }).then(res => res.json());
+    return await fetch(`${config.AUTH_API_URL}/exchange`, { credentials: "include", method: "POST", body: JSON.stringify({ "code": code }) }).then(res => res.json());
 }
 
 export async function logOut() {
-    await fetch(`${config.AUTH_URL}/logout`, {
+    await fetch(`${config.AUTH_API_URL}/logout`, {
         method: "DELETE",
         credentials: "include",
         mode: "cors"
