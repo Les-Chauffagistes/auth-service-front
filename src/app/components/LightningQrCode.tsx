@@ -15,7 +15,7 @@ export default function LightningQrCode({challenge, onLogin}: Readonly<Lightning
     let lnurl: string | null = null
     if (challenge) {
         lnurl = `lightning:${challenge.lnurl}`
-        const ws = new WebSocket(`${config.AUTH_URL}/lightning/ws?k1=${challenge.k1}`);
+        const ws = new WebSocket(`${config.AUTH_API_URL}/lightning/ws?k1=${challenge.k1}`);
         ws.onmessage = (ev) => {
             const data: components["schemas"]["LNCallbackSuccessPayload"] = JSON.parse(ev.data)
             exchangeCode(data.code).then(payload => onLogin(payload));

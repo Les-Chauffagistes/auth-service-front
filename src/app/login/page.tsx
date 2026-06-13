@@ -48,7 +48,7 @@ function LoginPageContent() {
     const [sessionToken, setSessionToken] = useState<string | null>(null);
 
     const searchParams = useSearchParams();
-    const redirect = searchParams.get("redirect") || config.AUTH_URL;
+    const redirect = searchParams.get("redirect") || config.BASE_URL;
     const showLnForm = activeProvider === "lightning";
     const showCredsForm = activeProvider === "credentials";
 
@@ -57,7 +57,7 @@ function LoginPageContent() {
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${config.AUTH_URL}/login-or-register`, {
+            const res = await fetch(`${config.AUTH_API_URL}/login-or-register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -83,7 +83,7 @@ function LoginPageContent() {
         setPseudoLoading(true);
 
         try {
-            const res = await fetch(`${config.AUTH_URL}/lightning/complete`, {
+            const res = await fetch(`${config.AUTH_API_URL}/lightning/complete`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -131,7 +131,7 @@ function LoginPageContent() {
                 <div
                     className="login-method"
                     onClick={() => {
-                        window.location.href = `${config.AUTH_URL}/discord/login?redirect=${redirect}`;
+                        window.location.href = `${config.BASE_URL}/discord/login?redirect=${redirect}`;
                     }}
                 >
                     <div className="login-method-icon">
