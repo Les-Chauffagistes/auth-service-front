@@ -44,7 +44,7 @@ export default function LoginClientPage() {
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${config.AUTH_URL}/login-or-register?${searchParams.toString()}`, {
+            const res = await fetch(`${config.AUTH_API_URL}/login-or-register?${searchParams.toString()}`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({username, password}),
