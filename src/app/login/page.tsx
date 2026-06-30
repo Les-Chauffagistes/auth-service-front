@@ -131,7 +131,7 @@ function LoginPageContent() {
                 <div
                     className="login-method"
                     onClick={() => {
-                        window.location.href = `${config.BASE_URL}/discord/login?redirect=${redirect}`;
+                        window.location.href = `${config.AUTH_API_URL}/discord/login?redirect=${redirect}`;
                     }}
                 >
                     <div className="login-method-icon">
