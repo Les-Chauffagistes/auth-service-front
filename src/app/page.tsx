@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { components } from "@les-chauffagistes/authentication-types"
+import { components } from "@les-chauffagistes/authentication-types";
 import { getMe, logOut } from "./api";
 import LinkWithSearchParams from "./components/LinkWithSearchParams";
 
@@ -18,15 +18,20 @@ export default function Home() {
       <div className={styles.main}>
         {user === undefined && <p>Loading...</p>}
         {user === null && <>
-          <p>Not logged in</p>
-          <LinkWithSearchParams
-            href="/login"
-          >Login</LinkWithSearchParams>
+            <p>Pas connecté</p>
+            <button className={"primary"}>
+                <LinkWithSearchParams
+                    href="/login"
+                >Se connecter</LinkWithSearchParams>
+            </button>
         </>
         }
         {user && <>
-          <p>Logged in as {user.pseudo}</p>
-          <button onClick={async () => await logOut()}>Logout</button>
+            <p>Connecté en tant que {user.pseudo}</p>
+            <button className={"tertiary"} onClick={async () => logOut().then(_ => {
+              setUser(null);
+            })}>Se déconnecter
+            </button>
         </>
         }
       </div>
