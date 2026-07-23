@@ -75,6 +75,17 @@
     box-shadow: 0 8px 24px color-mix(in srgb, var(--orange) 12%, transparent);
 }
 
+.login-method.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.login-method.disabled:hover {
+    border-color: var(--card-outline-color);
+    transform: none;
+    box-shadow: none;
+}
+
 .login-method-icon {
     width: 48px;
     height: 48px;
