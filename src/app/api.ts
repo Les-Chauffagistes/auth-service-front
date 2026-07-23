@@ -30,8 +30,13 @@ export async function refreshToken() {
     return await fetch(`${config.AUTH_API_URL}/refresh`, { credentials: "include", method: "POST" });
 }
 
-export async function getLNChallenge(): Promise<components["schemas"]["LNChallenge"]> {
-    return await fetch(`${config.AUTH_API_URL}/lightning/challenge`).then(res => res.json());
+export async function getLNChallenge(flow: "login" | "link" = "login"): Promise<components["schemas"]["LNChallenge"]> {
+    const query = flow === "link" ? "?flow=link" : "";
+    const res = await fetch(`${config.AUTH_API_URL}/lightning/challenge${query}`, { credentials: "include" });
+    if (!res.ok) {
+        throw new Error("Unable to create Lightning challenge");
+    }
+    return res.json();
 }
 
 export async function exchangeCode(code: string): Promise<components["schemas"]["ExchangeCodePayload"]> {
@@ -44,4 +49,17 @@ export async function logOut() {
         credentials: "include",
         mode: "cors"
     })
+}
+
+export type LinkedProviders = {
+    discord: boolean;
+    lightning: boolean;
+    credentials: boolean;
+    username: string | null;
+};
+
+export async function getProviders(): Promise<LinkedProviders | null> {
+    const res = await authFetch(`${config.AUTH_API_URL}/providers`);
+    if (!res.ok) return null;
+    return res.json();
 }

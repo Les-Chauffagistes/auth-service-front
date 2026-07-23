@@ -28,7 +28,12 @@ export default function Home() {
         }
         {user && <>
             <p>Connecté en tant que {user.pseudo}</p>
-            <button className={"tertiary"} onClick={async () => logOut().then(_ => {
+            <button className={"primary"}>
+              <LinkWithSearchParams
+                  href={{ pathname: "/login", query: { flow: "link" } }}
+              >Lier un compte</LinkWithSearchParams>
+            </button>
+            <button className={"tertiary"} onClick={async () => logOut().then(() => {
               setUser(null);
             })}>Se déconnecter
             </button>

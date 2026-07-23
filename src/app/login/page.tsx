@@ -5,10 +5,11 @@ import "./login.css";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import LightningQrCode from "../components/LightningQrCode";
-import { getLNChallenge } from "../api";
+import { getLNChallenge, getMe, getProviders, LinkedProviders } from "../api";
 import { components } from "@les-chauffagistes/authentication-types";
 import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
 import { config } from "@/lib/config";
+import { useEffect } from "react";
 
 function DiscordIcon() {
     return (
@@ -46,18 +47,34 @@ function LoginPageContent() {
     const [challenge, setChallenge] = useState<components["schemas"]["LNChallenge"] | null>(null);
     const [loading, setLoading] = useState(false);
     const [sessionToken, setSessionToken] = useState<string | null>(null);
+    const [linkedProviders, setLinkedProviders] = useState<LinkedProviders | null>(null);
+    const [currentUser, setCurrentUser] = useState<components["schemas"]["User"] | null | undefined>(undefined);
 
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || config.BASE_URL;
+    const flow = searchParams.get("flow") === "link" ? "link" : "login";
+    const isLinkFlow = flow === "link";
+    const linkUnavailable = isLinkFlow && currentUser === null;
     const showLnForm = activeProvider === "lightning";
     const showCredsForm = activeProvider === "credentials";
+
+    useEffect(() => {
+        if (!isLinkFlow) return;
+        getMe().then(user => {
+            setCurrentUser(user);
+            if (user) {
+                getProviders().then(setLinkedProviders);
+            }
+        });
+    }, [isLinkFlow]);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setError(null);
         setLoading(true);
         try {
-            const res = await fetch(`${config.AUTH_API_URL}/login-or-register`, {
+            const endpoint = isLinkFlow ? "/credentials/link" : "/login-or-register";
+            const res = await fetch(`${config.AUTH_API_URL}${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
@@ -68,7 +85,6 @@ function LoginPageContent() {
                 setError(data.error ?? "Erreur inconnue");
                 return;
             } else {
-                console.log(searchParams)
                 window.location.href = searchParams.get("redirect") || config.BASE_URL!;
             }
         } catch {
@@ -123,31 +139,43 @@ function LoginPageContent() {
             />
             <div className="login-header">
                 <Image src="/brand-icon.png" alt="Logo" width={50} height={50} quality={75} />
-                <h1>Bon retour parmi nous</h1>
-                <p>Connectez-vous à votre compte <span>Chauffagistes</span></p>
+                <h1>{isLinkFlow ? "Ajouter une méthode de connexion" : "Bon retour parmi nous"}</h1>
+                <p>
+                    {isLinkFlow
+                        ? "Liez un nouveau provider à votre compte"
+                        : <>Connectez-vous à votre compte <span>Chauffagistes</span></>}
+                </p>
+                {isLinkFlow && currentUser === null && (
+                    <p className="credentials-error">Vous devez être connecté pour lier un provider.</p>
+                )}
             </div>
 
             <div className="login-methods">
                 <div
-                    className="login-method"
+                    className={`login-method${linkedProviders?.discord || linkUnavailable ? " disabled" : ""}`}
                     onClick={() => {
-                        window.location.href = `${config.AUTH_API_URL}/discord/login?redirect=${redirect}`;
+                        if (linkedProviders?.discord || linkUnavailable) return;
+                        const flowQuery = isLinkFlow ? "&flow=link" : "";
+                        window.location.href = `${config.AUTH_API_URL}/discord/login?redirect=${redirect}${flowQuery}`;
                     }}
                 >
                     <div className="login-method-icon">
                         <DiscordIcon />
                     </div>
                     <h3>Discord</h3>
-                    <p>Connectez-vous avec votre compte Discord</p>
+                    <p>{linkedProviders?.discord ? "Déjà lié" : "Connectez-vous avec votre compte Discord"}</p>
                 </div>
 
                 <span className="login-divider">ou</span>
 
                 <div
-                    className={`login-method${showLnForm ? " expanded" : ""}`}
+                    className={`login-method${showLnForm ? " expanded" : ""}${linkedProviders?.lightning || linkUnavailable ? " disabled" : ""}`}
                     onClick={() => {
+                        if (linkedProviders?.lightning || linkUnavailable) return;
                         if (!showLnForm) {
-                            getLNChallenge().then(challenge => setChallenge(challenge));
+                            getLNChallenge(isLinkFlow ? "link" : "login")
+                                .then(challenge => setChallenge(challenge))
+                                .catch(() => setError("Impossible de créer le challenge Lightning."));
                             setError(null);
                             setActiveProvider("lightning");
                         }
@@ -157,7 +185,7 @@ function LoginPageContent() {
                         <LightningIcon />
                     </div>
                     <h3>Lightning</h3>
-                    {!showLnForm && <p>Authentification non-KYC via votre wallet</p>}
+                    {!showLnForm && <p>{linkedProviders?.lightning ? "Déjà lié" : "Authentification non-KYC via votre wallet"}</p>}
                     {showLnForm && (
                         <>
                             <LightningQrCode challenge={challenge} onLogin={(payload) => {
@@ -180,8 +208,9 @@ function LoginPageContent() {
                 <span className="login-divider">ou</span>
 
                 <div
-                    className={`login-method${showCredsForm ? " expanded" : ""}`}
+                    className={`login-method${showCredsForm ? " expanded" : ""}${linkedProviders?.credentials || linkUnavailable ? " disabled" : ""}`}
                     onClick={() => {
+                        if (linkedProviders?.credentials || linkUnavailable) return;
                         if (!showCredsForm) {
                             setError(null);
                             setActiveProvider("credentials");
@@ -192,7 +221,13 @@ function LoginPageContent() {
                         <UserIcon />
                     </div>
                     <h3>Identifiant</h3>
-                    {!showCredsForm && <p>Utiliser un identifiant et un mot de passe</p>}
+                    {!showCredsForm && (
+                        <p>
+                            {linkedProviders?.credentials
+                                ? `Déjà lié (${linkedProviders.username ?? "identifiant"})`
+                                : "Utiliser un identifiant et un mot de passe"}
+                        </p>
+                    )}
                     {showCredsForm && (
                         <form className="credentials-form" onSubmit={handleSubmit} onClick={e => e.stopPropagation()}>
                             <input
@@ -215,7 +250,7 @@ function LoginPageContent() {
                             />
                             {error && <p className="credentials-error">{error}</p>}
                             <button type="submit" className="primary" disabled={loading}>
-                                {loading ? "Connexion..." : "Continuer"}
+                                {loading ? "Connexion..." : isLinkFlow ? "Lier l'identifiant" : "Continuer"}
                             </button>
                             <button type="button" className="tertiary" onClick={(e) => { e.stopPropagation(); setActiveProvider(null); setError(null); }}>
                                 Retour
