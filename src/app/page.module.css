@@ -20,6 +20,24 @@
   gap: 40px;
 }
 
+.redirectCard {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--button-secondary-border);
+  border-radius: 12px;
+  background-color: color-mix(in srgb, var(--background) 94%, var(--orange) 6%);
+}
+
+.redirectText {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .intro {
   display: flex;
   flex-direction: column;

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import styles from "./page.module.css";
 import { components } from "@les-chauffagistes/authentication-types";
 import { getMe, logOut } from "./api";
 import LinkWithSearchParams from "./components/LinkWithSearchParams";
 import { useSearchParams } from "next/navigation";
 
-export default function Home() {
+function HomeContent() {
   const [user, setUser] = useState<components["schemas"]["User"] | undefined | null>(undefined);
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
@@ -21,14 +21,19 @@ export default function Home() {
     <div className={styles.page}>
       <div className={styles.main}>
         {redirect && (
-            <button
-                className={"tertiary"}
-                onClick={() => {
-                  window.location.href = redirect;
-                }}
-            >
-                {appName ? `Retourner sur ${appName}` : "Retourner là où j'étais"}
-            </button>
+            <div className={styles.redirectCard}>
+              <p className={styles.redirectText}>
+                {appName ? <>Vous êtiez sur <strong>{appName}</strong>.</> : "Vous aviez une navigation en cours."}
+              </p>
+              <button
+                  className={"secondary"}
+                  onClick={() => {
+                    window.location.href = redirect;
+                  }}
+              >
+                  {appName ? `Revenir sur ${appName}` : "Revenir à la page précédente"}
+              </button>
+            </div>
         )}
         {user === undefined && <p>Loading...</p>}
         {user === null && <>
@@ -55,5 +60,13 @@ export default function Home() {
         }
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+      <Suspense fallback={null}>
+        <HomeContent />
+      </Suspense>
   );
 }

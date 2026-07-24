@@ -1,6 +1,6 @@
 "use client";
-import { Suspense, useState } from "react";
 
+import { Suspense, useState, useEffect } from "react";
 import "./login.css";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -9,7 +9,7 @@ import { getLNChallenge, getMe, getProviders, LinkedProviders } from "../api";
 import { components } from "@les-chauffagistes/authentication-types";
 import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
 import { config } from "@/lib/config";
-import { useEffect } from "react";
+
 
 function DiscordIcon() {
     return (
