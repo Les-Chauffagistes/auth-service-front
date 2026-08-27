@@ -10,7 +10,7 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache openssl libssl3
+RUN apk add --no-cache openssl libssl3 curl
 
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static     ./.next/static
@@ -20,4 +20,8 @@ COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
 
 EXPOSE 3002
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:"${PORT:-3000}"/api/health || exit 1
+
 ENTRYPOINT ["sh", "docker-entrypoint.sh"]
