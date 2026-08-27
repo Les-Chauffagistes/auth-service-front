@@ -18,8 +18,9 @@ COPY --from=build /app/public           ./public
 
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
+ENV HOSTNAME=0.0.0.0
 
-EXPOSE 3002
+EXPOSE 3000
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:"${PORT:-3000}"/api/health || exit 1
