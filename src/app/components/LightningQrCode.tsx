@@ -1,6 +1,6 @@
 "use client";
 
-import {components} from '@les-chauffagistes/authentication-types';
+import {components} from '@chauffagistes/cmn';
 import {ExternalLink, QrCode} from 'lucide-react';
 import {QRCodeSVG} from 'qrcode.react';
 import {exchangeCode} from '../api';

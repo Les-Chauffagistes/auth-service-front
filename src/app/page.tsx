@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import styles from "./page.module.css";
-import { components } from "@les-chauffagistes/authentication-types";
+import { components } from "@chauffagistes/cmn";
 import { getMe, logOut } from "./api";
 import LinkWithSearchParams from "./components/LinkWithSearchParams";
 import { useSearchParams } from "next/navigation";
