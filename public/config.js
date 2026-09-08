@@ -1,4 +1,4 @@
 window.__CONFIG__ = {
-    AUTH_URL: "https://api.auth.staging.chauffagistes-btc.fr/auth",
-    BASE_URL: "https://auth.staging.chauffagistes-btc.fr"
+    AUTH_API_URL: "http://localhost:8086",
+    BASE_URL: "http://localhost:3005"
 };
