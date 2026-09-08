@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import LightningQrCode from "../components/LightningQrCode";
 import { getLNChallenge, getMe, getProviders, LinkedProviders } from "../api";
-import { components } from "@les-chauffagistes/authentication-types";
+import { components } from "@chauffagistes/cmn";
 import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
 import { config } from "@/lib/config";
 
