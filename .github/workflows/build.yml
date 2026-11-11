@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-app:
-    uses: les-chauffagistes/deploy/.github/workflows/build.yml@develop
+    uses: les-chauffagistes/deploy/.github/workflows/build.yml@a1a6afd58d00568f4a3ec0168efcc92c2330800e
     with:
       service-name: auth-service-front
     secrets: inherit

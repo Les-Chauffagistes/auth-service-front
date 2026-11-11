@@ -1,4 +1,4 @@
-import { components } from "@les-chauffagistes/authentication-types"
+import { components } from "@chauffagistes/cmn"
 import { config } from "@/lib/config";
 
 async function authFetch(input: RequestInfo, init?: RequestInit) {

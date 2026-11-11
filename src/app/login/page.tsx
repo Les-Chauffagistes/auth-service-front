@@ -6,10 +6,12 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import LightningQrCode from "../components/LightningQrCode";
 import { getLNChallenge, getMe, getProviders, LinkedProviders } from "../api";
-import { components } from "@les-chauffagistes/authentication-types";
-import ChoosePseudoPopup from "../components/ChoosePseudoPopup";
+import { components } from "@chauffagistes/cmn";
 import { config } from "@/lib/config";
 
+
+const LIGHTNING_SIGNUP_DISABLED_MESSAGE =
+    "Les inscriptions via Lightning sont désactivées. Connectez-vous avec un compte existant ou utilisez un autre moyen de connexion.";
 
 function DiscordIcon() {
     return (
@@ -40,13 +42,8 @@ function LoginPageContent() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const [pseudo, setPseudo] = useState("");
-    const [pseudoPopupOpen, setPseudoPopupOpen] = useState(false);
-    const [pseudoError, setPseudoError] = useState<string | null>(null);
-    const [pseudoLoading, setPseudoLoading] = useState(false);
     const [challenge, setChallenge] = useState<components["schemas"]["LNChallenge"] | null>(null);
     const [loading, setLoading] = useState(false);
-    const [sessionToken, setSessionToken] = useState<string | null>(null);
     const [linkedProviders, setLinkedProviders] = useState<LinkedProviders | null>(null);
     const [currentUser, setCurrentUser] = useState<components["schemas"]["User"] | null | undefined>(undefined);
 
@@ -94,49 +91,8 @@ function LoginPageContent() {
         }
     }
 
-    async function handlePseudoSubmit(nextPseudo: string) {
-        setPseudoError(null);
-        setPseudoLoading(true);
-
-        try {
-            const res = await fetch(`${config.AUTH_API_URL}/lightning/complete`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ pseudo: nextPseudo, session_token: sessionToken }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => null);
-                setPseudoError(data?.error ?? "Impossible d'enregistrer ce pseudo.");
-                return;
-            }
-
-            setPseudo(nextPseudo);
-            setPseudoPopupOpen(false);
-            window.location.href = searchParams.get("redirect") || config.BASE_URL;
-        } catch {
-            setPseudoError("Erreur réseau");
-        } finally {
-            setPseudoLoading(false);
-        }
-    }
-
     return (
         <div className="login-container">
-            <ChoosePseudoPopup
-                key={`${pseudoPopupOpen}-${pseudo}`}
-                error={pseudoError}
-                initialValue={pseudo}
-                isOpen={pseudoPopupOpen}
-                isSubmitting={pseudoLoading}
-                onClose={() => {
-                    if (!pseudoLoading) {
-                        setPseudoPopupOpen(false);
-                    }
-                }}
-                onSubmit={handlePseudoSubmit}
-            />
             <div className="login-header">
                 <Image src="/brand-icon.png" alt="Logo" width={50} height={50} quality={75} />
                 <h1>{isLinkFlow ? "Ajouter une méthode de connexion" : "Bon retour parmi nous"}</h1>
@@ -188,16 +144,16 @@ function LoginPageContent() {
                     {!showLnForm && <p>{linkedProviders?.lightning ? "Déjà lié" : "Authentification non-KYC via votre wallet"}</p>}
                     {showLnForm && (
                         <>
-                            <LightningQrCode challenge={challenge} onLogin={(payload) => {
-                                if (payload.status === "onboarding") {
-                                    setSessionToken(payload.session_token || null); // session_token is never undefined here
-                                    setPseudoError(null);
-                                    setPseudoPopupOpen(true);
-                                } else if (payload.status === "logged_in") {
-                                    window.location.href = searchParams.get("redirect") || config.BASE_URL;
-                                }
-                            }
-                            } />
+                            <LightningQrCode
+                                challenge={challenge}
+                                onLogin={(payload) => {
+                                    if (payload.status === "logged_in") {
+                                        window.location.href = searchParams.get("redirect") || config.BASE_URL;
+                                    }
+                                }}
+                                onSignupDisabled={() => setError(LIGHTNING_SIGNUP_DISABLED_MESSAGE)}
+                            />
+                            {error && <p className="credentials-error">{error}</p>}
                             <button type="button" className="tertiary" onClick={(e) => { e.stopPropagation(); setActiveProvider(null); }}>
                                 Retour
                             </button>
