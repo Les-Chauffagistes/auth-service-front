@@ -8,16 +8,21 @@ import {config} from "@/lib/config";
 
 type LightningQrCodeProps = {
     challenge: components["schemas"]["LNChallenge"] | null,
-    onLogin: (payload: components["schemas"]["ExchangeCodePayload"]) => void
+    onLogin: (payload: components["schemas"]["ExchangeCodePayload"]) => void,
+    onSignupDisabled?: () => void
 }
 
-export default function LightningQrCode({challenge, onLogin}: Readonly<LightningQrCodeProps>) {
+export default function LightningQrCode({challenge, onLogin, onSignupDisabled}: Readonly<LightningQrCodeProps>) {
     let lnurl: string | null = null
     if (challenge) {
         lnurl = `lightning:${challenge.lnurl}`
         const ws = new WebSocket(`${config.AUTH_API_URL}/lightning/ws?k1=${challenge.k1}`);
         ws.onmessage = (ev) => {
-            const data: components["schemas"]["LNCallbackSuccessPayload"] = JSON.parse(ev.data)
+            const data = JSON.parse(ev.data)
+            if (data.status === "ERROR") {
+                onSignupDisabled?.()
+                return
+            }
             exchangeCode(data.code).then(payload => onLogin(payload));
         }
     }
